@@ -80,31 +80,3 @@ jobs:
           name: dbt-docs
           path: target/
 
-      - name: Notify deployment success
-        if: success()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const output = `
-            🚀 **dbt Production Deployment Successful**
-            
-            **Branch**: ${{ github.ref_name }}
-            **Commit**: ${{ github.sha }}
-            **Timestamp**: ${{ github.event.head_commit.timestamp }}
-            
-            **Deployed components**:
-            - ✅ Seeds loaded
-            - ✅ Models built
-            - ✅ Tests passed
-            - ✅ Snapshots updated
-            - ✅ Documentation generated
-            
-            **Target Environment**: Production (dev dataset)
-            `;
-            
-            github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: output
-            });

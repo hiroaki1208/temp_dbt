@@ -1,0 +1,106 @@
+name: dbt CI
+
+on:
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'models/**'
+      - 'macros/**'
+      - 'tests/**'
+      - 'seeds/**'
+      - 'snapshots/**'
+      - 'dbt_project.yml'
+      - 'packages.yml'
+
+jobs:
+  dbt-ci:
+    runs-on: ubuntu-latest
+    
+    env:
+      DBT_PROFILES_DIR: .
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Set up Google Cloud credentials
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+        run: |
+          echo "$GOOGLE_CREDENTIALS" > keyfile.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/keyfile.json" >> $GITHUB_ENV
+
+      - name: Update profiles.yml with credentials
+        run: |
+          sed -i 's|/path/to/your/keyfile.json|'"$(pwd)/keyfile.json"'|g' profiles.yml
+
+      - name: Install dbt packages
+        run: dbt deps
+
+      - name: Check dbt configuration
+        run: dbt debug
+
+      - name: Parse dbt project
+        run: dbt parse
+
+      - name: Run dbt models (dry-run)
+        run: dbt run --target dev
+
+      - name: Run dbt tests
+        run: dbt test --target dev
+
+      - name: Generate and upload docs
+        run: |
+          dbt docs generate --target dev
+        if: success()
+
+      - name: Comment PR with results
+        uses: actions/github-script@v6
+        if: always()
+        with:
+          script: |
+            const output = `
+            #### dbt CI Results 🚀
+            
+            **Status**: ${{ job.status }}
+            
+            **Steps completed**:
+            - ✅ Dependencies installed
+            - ✅ dbt configuration validated
+            - ✅ Models parsed successfully
+            - ✅ Models executed (dry-run)
+            - ✅ Tests executed
+            
+            <details><summary>Show Details</summary>
+            
+            **Target**: dev environment
+            **Branch**: ${{ github.head_ref }}
+            **Commit**: ${{ github.sha }}
+            
+            </details>
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });

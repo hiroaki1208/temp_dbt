@@ -48,9 +48,9 @@ jobs:
           echo "$GOOGLE_CREDENTIALS" > keyfile.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/keyfile.json" >> $GITHUB_ENV
 
-      - name: Update profiles.yml with credentials
+      - name: Use CI profiles
         run: |
-          sed -i 's|/path/to/your/keyfile.json|'"$(pwd)/keyfile.json"'|g' profiles.yml
+          cp profiles_ci.yml profiles.yml
 
       - name: Install dbt packages
         run: dbt deps

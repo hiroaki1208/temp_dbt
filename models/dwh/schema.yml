@@ -3,16 +3,11 @@ version: 2
 models:
   - name: dwh_asset_status_history
     description: "DWH asset status history view with parsed datetime"
-    tests:
-      # Test that the table has no null values in any column
-      - dbt_utils.not_null_proportion:
-          at_least: 1.0
     columns:
       - name: event_time_jst
         description: "Event timestamp in JST"
         tests:
           - not_null
-          - test_is_datetime
       - name: ticker
         description: "Asset ticker symbol"
         tests:

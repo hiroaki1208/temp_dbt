@@ -6,11 +6,10 @@ temp_dbt:
       project: trading-prod-468212
       dataset: TEMP
       threads: 1
-      timeout_seconds: 300
+      job_execution_timeout_seconds: 300
       location: US
       job_retry_deadline_seconds: 600
       keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS') }}"
-      job_execution_timeout_seconds: 300
       job_retries: 1
     prod:
       type: bigquery
@@ -18,10 +17,9 @@ temp_dbt:
       project: trading-prod-468212
       dataset: TEMP_PROD
       threads: 4
-      timeout_seconds: 300
+      job_execution_timeout_seconds: 300
       location: US
       job_retry_deadline_seconds: 600
       keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS') }}"
-      job_execution_timeout_seconds: 300
       job_retries: 1
   target: dev

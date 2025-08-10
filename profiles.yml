@@ -6,7 +6,7 @@ temp_dbt:
       project: trading-prod-468212
       dataset: TEMP
       threads: 1
-      timeout_seconds: 300
+      job_execution_timeout_seconds: 300
       location: US
       job_retry_deadline_seconds: 600
       keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS', '/path/to/your/keyfile.json') }}"
@@ -14,9 +14,9 @@ temp_dbt:
       type: bigquery
       method: service-account
       project: trading-prod-468212
-      dataset: trading
+      dataset: TEMP_PROD
       threads: 4
-      timeout_seconds: 300
+      job_execution_timeout_seconds: 300
       location: US
       job_retry_deadline_seconds: 600
       keyfile: "{{ env_var('GOOGLE_APPLICATION_CREDENTIALS', '/path/to/your/keyfile.json') }}"

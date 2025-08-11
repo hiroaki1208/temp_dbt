@@ -11,6 +11,8 @@ on:
       - 'snapshots/**'
       - 'dbt_project.yml'
       - 'packages.yml'
+      - 'profiles_ci.yml'
+      - 'profiles.yml'
 
 jobs:
   dbt-ci:
